@@ -1,13 +1,13 @@
 {
   "name": "mysql-cms-employee-mgmt-system-project",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "An employee management system command line application.",
+  "main": "server.js",
   "scripts": {
-    "devStart": "echo \"Error: no test specified\" && exit 1"
+    "devStart": "node server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Robert Parsons",
   "license": "ISC",
   "dependencies": {
     "console.table": "^0.10.0",
