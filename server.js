@@ -2,7 +2,11 @@ const mysql = require('mysql');
 const inquirer = require('inquirer');
 require('dotenv').config();
 
+const employeeArr = [];
+const managerArr = [];
+const departmentArr = [];
 const roleArr = [];
+const salaryArr = [];
 
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
@@ -37,6 +41,7 @@ const prompt = () => {
                 'Update Employee Role',
                 'Update Employee Manager',
                 'View all Roles',
+                'View all Departments',
                 'Terminate',
             ],
         })
@@ -47,13 +52,11 @@ const prompt = () => {
                     break;
 
                 case 'View all Employees by Department':
-                    console.log(data.action);
-                    // viewAllEmployeesByDept();
+
                     break;
 
                 case 'View all Employees by Manager':
-                    console.log(data.action);
-                    // viewAllEmployeesByDept();
+
                     break;
 
                 case 'Add Employee':
@@ -65,27 +68,31 @@ const prompt = () => {
                     break;
 
                 case 'Add Department':
-                    // viewAllEmployeesByDept();
+
                     break;
 
                 case 'Remove Employee':
-                    // run function here
+
                     break;
 
                 case 'Update Employee Role':
-                    // run function here
+
                     break;
 
                 case 'Update Employee Manager':
-                    // run function here
+
                     break;
 
                 case 'View all Roles':
-                    // run function here
+                    viewAllRoles(); //DONE
+                    break;
+
+                case 'View all Departments':
+                    viewAllDepartments(); //DONE (extra)
                     break;
 
                 case 'Terminate':
-                    // run function here
+
                     break;
             }
         });
@@ -94,6 +101,20 @@ const prompt = () => {
 // COMPLETE
 const viewAllEmployees = () => {
     connection.query('SELECT * FROM `employee`', (err, results, field) => {
+        if (err) throw err;
+        console.table(results);
+    });
+};
+
+const viewAllRoles = () => {
+    connection.query('SELECT * FROM `role`', (err, results, field) => {
+        if (err) throw err;
+        console.table(results);
+    });
+};
+
+const viewAllDepartments = () => {
+    connection.query('SELECT * FROM `department`', (err, results, field) => {
         if (err) throw err;
         console.table(results);
     });
@@ -125,14 +146,18 @@ const addEmployee = () => {
             message: `What's the employee's last name?`,
             validate: validateLetters,
         },
+        {
+            name: 'role',
+            type: 'list',
+            message: `What's the employee's role`,
+            choices: roleArr,
+        },
     ];
 
     inquirer.prompt(questions).then((answers) => {
         connection.query(
             `INSERT INTO employee 
-             VALUES (DEFAULT, '${answers.firstName}', '${answers.lastName}', DEFAULT, DEFAULT);
-             INSERT INTO role 
-             VALUES (DEFAULT, '${answers.role}', '${answers.salary}' , DEFAULT)`,
+             VALUES (DEFAULT, '${answers.firstName}', '${answers.lastName}', DEFAULT, DEFAULT);`,
             (err, results, field) => {
                 if (err) throw err;
                 console.table(results);
@@ -146,13 +171,13 @@ const addRole = () => {
         {
             name: 'role',
             type: 'input',
-            message: `What's the employee's job title?`
+            message: `What's the employee's job title?`,
         },
         {
             name: 'salary',
             type: 'input',
             message: `What's the employee's salary?`,
-            validate: validateSalary
+            validate: validateSalary,
         },
     ];
 
@@ -162,13 +187,15 @@ const addRole = () => {
              VALUES (DEFAULT, '${answers.role}', '${answers.salary}' , DEFAULT)`,
             (err, results, field) => {
                 if (err) throw err;
+                roleArr.push(answers.role);
+                salaryArr.push(answers.salary);
                 console.table(results);
+                console.log(roleArr);
+                console.log(parseInt(salaryArr));
             }
         );
     });
 };
-
-
 
 // // connection.end();
 
@@ -181,9 +208,9 @@ const validateLetters = (name) => {
 };
 
 const validateSalary = (salary) => {
-    let pass = salary.match(/^\d*\.?\d+$/)
+    let pass = salary.match(/^\d*\.?\d+$/);
     if (pass) {
         return true;
     }
-    return 'Please do not enter any commas.'
-}
+    return 'Please do not enter any commas.';
+};
