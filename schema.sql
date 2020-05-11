@@ -45,3 +45,7 @@ CREATE TABLE IF NOT EXISTS employee
     ON UPDATE CASCADE
     ON DELETE NO ACTION
 );
+
+SELECT * FROM employee;
+SELECT * FROM role;
+SELECT * FROM department;
