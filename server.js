@@ -21,7 +21,7 @@ connection.connect((err) => {
         return;
     }
     console.log(`connected as id ${connection.threadId}`);
-    // seedDatabase();
+    seedDatabase();
     prompt();
 });
 
@@ -279,7 +279,6 @@ const removeEmployee = () => {
                  WHERE  `,
                 (err, results, field) => {
                     if (err) throw err;
-                    // update global employee array to reflect updated changes
                     // invoke slice method? perhaps val.match method? then slice?
                     console.table(results);
                     console.log(employeeArr);
@@ -288,7 +287,7 @@ const removeEmployee = () => {
         });
     }
 
-    console.log('Please add an employee before you try to remove it');
+    console.log('Please add an employee before removing');
 };
 
 // VALIDATION FUNCTIONS
@@ -309,10 +308,18 @@ const validateSalary = (salary) => {
     return 'Please do not enter any commas.';
 };
 
-// // connection.end();
-
+// SEED DATABASE
+// =========================================================================================
 const seedDatabase = () => {
+    employeeArr.length = 0;
+    roleArr.length = 0;
+    salaryArr.length = 0;
+    departmentArr.length = 0;
+    managerArr.length = 0;
+
     let seedEmployees = 'SELECT first_name, last_name FROM employee';
+    let seedManagers =
+        'SELECT first_name, last_name FROM employee WHERE manager_id IS NOT NULL';
     let seedRoles = 'SELECT title FROM role';
     let seedSalaries = 'SELECT salary FROM role';
     let seedDepartments = 'SELECT name FROM department';
@@ -323,6 +330,16 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             employeeArr.push(res[i].first_name + ' ' + res[i].last_name);
         }
+        console.table(employeeArr);
+    });
+
+    connection.query(seedManagers, (err, res) => {
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            managerArr.push(res[i].first_name + ' ' + res[i].last_name);
+        }
+        console.table(managerArr);
     });
 
     connection.query(seedRoles, (err, res) => {
@@ -331,6 +348,7 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             roleArr.push(res[i].title);
         }
+        console.table(roleArr);
     });
 
     connection.query(seedSalaries, (err, res) => {
@@ -339,6 +357,7 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             salaryArr.push(res[i].salary);
         }
+        console.table(salaryArr);
     });
 
     connection.query(seedDepartments, (err, res) => {
@@ -347,5 +366,6 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             departmentArr.push(res[i].name);
         }
+        console.table(departmentArr);
     });
 };
