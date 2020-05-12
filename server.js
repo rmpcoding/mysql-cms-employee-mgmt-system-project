@@ -53,6 +53,7 @@ const prompt = () => {
                     break;
 
                 case 'View all Employees by Department':
+                    viewAllEmployeesByDepartment();
                     break;
 
                 case 'View all Employees by Manager':
@@ -95,7 +96,14 @@ const prompt = () => {
 
 // COMPLETE
 const viewAllEmployees = () => {
-    connection.query('SELECT * FROM `employee`', (err, results, field) => {
+    let query = `SELECT e.first_name, e.last_name, r.title, d.name AS department
+                 FROM employee e
+                 JOIN role r
+                 ON e.role_id = r.id
+                 JOIN department d
+                 ON r.department_id = d.id;`
+
+    connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
     });
@@ -108,8 +116,12 @@ const viewAllRoles = () => {
     });
 };
 
-const viewAllDepartments = () => {
-    connection.query('SELECT * FROM `department`', (err, results, field) => {
+const viewAllEmployeesByDepartment = () => {
+    let query = `SELECT d.name, e.first_name, e.last_name, r.title, r.salary FROM employee e 
+                 JOIN role r ON e.role_id = r.id 
+                 JOIN department d 
+                 ON r.department_id = d.id;`
+    connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
     });
@@ -279,7 +291,6 @@ const removeEmployee = () => {
                  WHERE  `,
                 (err, results, field) => {
                     if (err) throw err;
-                    // invoke slice method? perhaps val.match method? then slice?
                     console.table(results);
                     console.log(employeeArr);
                 }
