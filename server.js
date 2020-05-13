@@ -49,26 +49,26 @@ const prompt = () => {
         .then((data) => {
             switch (data.action) {
                 case 'View all Employees':
-                    viewAllEmployees();
+                    viewAllEmployees(); //DONE
                     break;
 
                 case 'View all Employees by Department':
-                    viewAllEmployeesByDepartment();
+                    viewAllEmployeesByDepartment(); //DONE
                     break;
 
                 case 'View all Employees by Manager':
                     break;
 
                 case 'Add Employee':
-                    addEmployee();
+                    addEmployee(); //MVP DONE; STILL NEEDS LOGIC IN QUESTIONS/OUTPUTS 
                     break;
 
                 case 'Add Role':
-                    addRole();
+                    addRole(); //DONE
                     break;
 
                 case 'Add Department':
-                    addDepartment();
+                    addDepartment(); //DONE
                     break;
 
                 case 'Remove Employee':
@@ -85,10 +85,12 @@ const prompt = () => {
                     break;
 
                 case 'View all Departments':
-                    viewAllDepartments(); //DONE (extra)
+                    viewAllDepartments(); //DONE
                     break;
 
                 case 'Terminate':
+                    console.log('Thank you for using this program :)')
+                    connection.end(); //DONE
                     break;
             }
         });
@@ -110,14 +112,17 @@ const viewAllEmployees = () => {
 };
 
 const viewAllRoles = () => {
-    connection.query('SELECT * FROM `role`', (err, results, field) => {
+    let query = `SELECT title, salary 
+                 FROM role`
+    connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
     });
 };
 
 const viewAllEmployeesByDepartment = () => {
-    let query = `SELECT d.name, e.first_name, e.last_name, r.title, r.salary FROM employee e 
+    let query = `SELECT d.name AS department, e.first_name, e.last_name, r.title, r.salary 
+                 FROM employee e 
                  JOIN role r ON e.role_id = r.id 
                  JOIN department d 
                  ON r.department_id = d.id;`
@@ -213,7 +218,7 @@ const addEmployee = () => {
     });
 };
 
-// ADD ROLE
+// ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
 // =========================================================================================
 const addRole = () => {
     let questions = [
@@ -272,7 +277,7 @@ const addDepartment = () => {
     });
 };
 
-// REMOVE EMPLOYEES
+// REMOVE EMPLOYEES STILL NEEDS SQL 
 // =========================================================================================
 const removeEmployee = () => {
     if (employeeArr) {
