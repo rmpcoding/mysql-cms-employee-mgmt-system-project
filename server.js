@@ -72,6 +72,7 @@ const prompt = () => {
                     break;
 
                 case 'Remove Employee':
+                    removeEmployee();
                     break;
 
                 case 'Update Employee Role':
@@ -167,8 +168,8 @@ const addEmployee = () => {
         inquirer.prompt(questions).then((answers) => {
             const { firstName, lastName, role, manager } = answers;
 
-            let managerFirstName = manager.split(' ').slice(0,1).join()
-            let managerLastName = manager.split(' ').slice(1).join()
+            let managerFirstName = manager.split(' ').slice(0, 1).join();
+            let managerLastName = manager.split(' ').slice(1).join();
 
             let query = `INSERT INTO employee 
                             (id, 
@@ -263,7 +264,7 @@ const removeEmployee = () => {
     if (employeeArr) {
         let questions = [
             {
-                name: 'remove',
+                name: 'removeName',
                 type: 'list',
                 message: `Which employee would you like to remove?`,
                 choices: employeeArr,
@@ -271,15 +272,30 @@ const removeEmployee = () => {
         ];
 
         inquirer.prompt(questions).then((answers) => {
-            connection.query(
-                `DELETE FROM employee
-                 WHERE  `,
-                (err, results, field) => {
-                    if (err) throw err;
-                    console.table(results);
-                    console.log(employeeArr);
-                }
-            );
+            const { removeName } = answers;
+
+            let firstName = removeName.split(' ').slice(0, 1).join();
+            let lastName = removeName.split(' ').slice(1).join();
+            let query = `DELETE FROM employee
+                         WHERE first_name = '${firstName}' AND last_name = '${lastName}';`;
+
+            connection.query(query, (err, results, field) => {
+                if (err) throw err;
+                console.table(results);
+                console.log("Employee successfully removed!")
+            });
+
+            const viewUpdate = `SELECT e.first_name, e.last_name, r.title, d.name AS department
+                              FROM employee e
+                              JOIN role r
+                              ON e.role_id = r.id
+                              JOIN department d
+                              ON r.department_id = d.id;`;
+
+            connection.query(viewUpdate, (err, results, field) => {
+                if (err) throw err;
+                console.table(results);
+            });
         });
     }
 
