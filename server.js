@@ -60,7 +60,7 @@ const prompt = () => {
                     break;
 
                 case 'Add Employee':
-                    addEmployee(); //MVP DONE; STILL NEEDS LOGIC IN QUESTIONS/OUTPUTS
+                    addEmployee(); //DONE
                     break;
 
                 case 'Add Role':
@@ -170,33 +170,29 @@ const addEmployee = () => {
             let managerFirstName = manager.split(' ').slice(0,1).join()
             let managerLastName = manager.split(' ').slice(1).join()
 
-            console.log(managerFirstName)
-            console.log(managerLastName)
-
             let query = `INSERT INTO employee 
                             (id, 
                             first_name, 
                             last_name, 
                             role_id, 
                             manager_id)
-                         VALUES 
+                        VALUES 
                             (DEFAULT, 
                             '${firstName}', 
                             '${lastName}', 
                             (SELECT id FROM role r
                                 WHERE title = '${role}'), 
-                            (SELECT 
-                                e.manager_id
-                            FROM employee e
-                            WHERE (e.first_name = '${managerFirstName}') AND 
-                                  (e.last_name = '${managerLastName}') AND 
-                                  (e.manager_id IS NULL)) );`;
+                            (SELECT role_id
+                                FROM employee e
+                                WHERE 
+                                    (e.first_name = '${managerFirstName}') AND 
+                                    (e.last_name = '${managerLastName}') AND 
+                                    (e.manager_id IS NULL)) );`;
 
             connection.query(query, (err, results, field) => {
                 if (err) throw err;
                 employeeArr.push(`${firstName} ${lastName}`);
-                console.table(results);
-                console.log(employeeArr);
+                console.table(employeeArr);
             });
         });
     }
