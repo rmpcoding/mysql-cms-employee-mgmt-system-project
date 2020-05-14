@@ -76,3 +76,52 @@ const prompt = () => {
 prompt();
 
 module.exports = prompt;
+
+
+
+
+// BELOW IS EXTRANEOUS BUT USEABLE CODE FOR FUTURE VERSIONS DO NOT DELETE
+
+let questionsForFirstTimeUser = [
+    {
+        name: 'firstName',
+        type: 'input',
+        message: `What's the employee's first name?`,
+        validate: validateLetters,
+    },
+    {
+        name: 'lastName',
+        type: 'input',
+        message: `What's the employee's last name?`,
+        validate: validateLetters,
+    },
+    {
+        name: 'role',
+        type: 'input',
+        message: `What's the employee's role?`,
+    },
+    {
+        name: 'salary',
+        type: 'input',
+        message: `What's the employee's salary associated with this role?`,
+    },
+];
+
+
+    // If there is nothing in the global employee array (first time user), then use this
+    inquirer.prompt(questionsForFirstTimeUser).then((answers) => {
+        connection.query(
+            `INSERT INTO employee 
+             VALUES (DEFAULT, '${answers.firstName}', '${answers.lastName}', DEFAULT, DEFAULT);
+             INSERT INTO role 
+             VALUES (DEFAULT, '${answers.role}', '${answers.salary}', DEFAULT);`,
+            (err, results, field) => {
+                if (err) throw err;
+                employeeArr.push(`${answers.firstName} ${answers.lastName}`);
+                roleArr.push(answers.role);
+                console.table(results);
+                console.log(employeeArr);
+                console.log(roleArr);
+            }
+        );
+    });

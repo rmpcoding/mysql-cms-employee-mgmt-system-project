@@ -60,7 +60,7 @@ const prompt = () => {
                     break;
 
                 case 'Add Employee':
-                    addEmployee(); //MVP DONE; STILL NEEDS LOGIC IN QUESTIONS/OUTPUTS 
+                    addEmployee(); //MVP DONE; STILL NEEDS LOGIC IN QUESTIONS/OUTPUTS
                     break;
 
                 case 'Add Role':
@@ -89,7 +89,7 @@ const prompt = () => {
                     break;
 
                 case 'Terminate':
-                    console.log('Thank you for using this program :)')
+                    console.log('Thank you for using this program :)');
                     connection.end(); //DONE
                     break;
             }
@@ -103,7 +103,7 @@ const viewAllEmployees = () => {
                  JOIN role r
                  ON e.role_id = r.id
                  JOIN department d
-                 ON r.department_id = d.id;`
+                 ON r.department_id = d.id;`;
 
     connection.query(query, (err, results, field) => {
         if (err) throw err;
@@ -113,7 +113,7 @@ const viewAllEmployees = () => {
 
 const viewAllRoles = () => {
     let query = `SELECT title, salary 
-                 FROM role`
+                 FROM role`;
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
@@ -125,7 +125,7 @@ const viewAllEmployeesByDepartment = () => {
                  FROM employee e 
                  JOIN role r ON e.role_id = r.id 
                  JOIN department d 
-                 ON r.department_id = d.id;`
+                 ON r.department_id = d.id;`;
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
@@ -154,68 +154,52 @@ const addEmployee = () => {
             message: `What's the employee's role`,
             choices: roleArr,
         },
-    ];
-
-    let questionsForFirstTimeUser = [
         {
-            name: 'firstName',
-            type: 'input',
-            message: `What's the employee's first name?`,
-            validate: validateLetters,
-        },
-        {
-            name: 'lastName',
-            type: 'input',
-            message: `What's the employee's last name?`,
-            validate: validateLetters,
-        },
-        {
-            name: 'role',
-            type: 'input',
-            message: `What's the employee's role?`,
-        },
-        {
-            name: 'salary',
-            type: 'input',
-            message: `What's the employee's salary associated with this role?`,
+            name: 'manager',
+            type: 'list',
+            message: `Who's the employee's manager`,
+            choices: managerArr,
         },
     ];
 
     // If the database already has employees, use global employee array for their choice
-    if (roleArr) {
+    if (employeeArr) {
         inquirer.prompt(questions).then((answers) => {
-            connection.query(
-                `INSERT INTO employee 
-                 VALUES (DEFAULT, '${answers.firstName}', '${answers.lastName}', DEFAULT, DEFAULT);`,
-                (err, results, field) => {
-                    if (err) throw err;
-                    employeeArr.push(
-                        `${answers.firstName} ${answers.lastName}`
-                    );
-                    console.table(results);
-                    console.log(employeeArr);
-                }
-            );
-        });
-    }
+            const { firstName, lastName, role, manager } = answers;
 
-    // If there is nothing in the global employee array (first time user), then use this
-    inquirer.prompt(questionsForFirstTimeUser).then((answers) => {
-        connection.query(
-            `INSERT INTO employee 
-             VALUES (DEFAULT, '${answers.firstName}', '${answers.lastName}', DEFAULT, DEFAULT);
-             INSERT INTO role 
-             VALUES (DEFAULT, '${answers.role}', '${answers.salary}', DEFAULT);`,
-            (err, results, field) => {
+            let managerFirstName = manager.split(' ').slice(0,1).join()
+            let managerLastName = manager.split(' ').slice(1).join()
+
+            console.log(managerFirstName)
+            console.log(managerLastName)
+
+            let query = `INSERT INTO employee 
+                            (id, 
+                            first_name, 
+                            last_name, 
+                            role_id, 
+                            manager_id)
+                         VALUES 
+                            (DEFAULT, 
+                            '${firstName}', 
+                            '${lastName}', 
+                            (SELECT id FROM role r
+                                WHERE title = '${role}'), 
+                            (SELECT 
+                                e.manager_id
+                            FROM employee e
+                            WHERE (e.first_name = '${managerFirstName}') AND 
+                                  (e.last_name = '${managerLastName}') AND 
+                                  (e.manager_id IS NULL)) );`;
+
+            connection.query(query, (err, results, field) => {
                 if (err) throw err;
-                employeeArr.push(`${answers.firstName} ${answers.lastName}`);
-                roleArr.push(answers.role);
+                employeeArr.push(`${firstName} ${lastName}`);
                 console.table(results);
                 console.log(employeeArr);
-                console.log(roleArr);
-            }
-        );
-    });
+            });
+        });
+    }
 };
 
 // ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
@@ -277,7 +261,7 @@ const addDepartment = () => {
     });
 };
 
-// REMOVE EMPLOYEES STILL NEEDS SQL 
+// REMOVE EMPLOYEES STILL NEEDS SQL
 // =========================================================================================
 const removeEmployee = () => {
     if (employeeArr) {
@@ -335,7 +319,7 @@ const seedDatabase = () => {
 
     let seedEmployees = 'SELECT first_name, last_name FROM employee';
     let seedManagers =
-        'SELECT first_name, last_name FROM employee WHERE manager_id IS NOT NULL';
+        'SELECT first_name, last_name FROM employee WHERE manager_id IS NULL';
     let seedRoles = 'SELECT title FROM role';
     let seedSalaries = 'SELECT salary FROM role';
     let seedDepartments = 'SELECT name FROM department';
