@@ -21,7 +21,7 @@ connection.connect((err) => {
         return;
     }
     console.log(`connected as id ${connection.threadId}`);
-    seedDatabase();
+    populateArrays();
     prompt();
 });
 
@@ -81,7 +81,7 @@ const prompt = () => {
                     break;
 
                 case 'Update Employee Manager':
-                    updateEmployeeManager();
+                    updateEmployeeManager(); //DONE
                     break;
 
                 case 'View all Roles':
@@ -129,6 +129,7 @@ const viewAllRoles = () => {
 
 // VIEW ALL EMPLOYEES BY DEPARTMENT
 // =========================================================================================
+// This needs work because it doesn't give the user a chance to choose the department they want by which to view employees
 const viewAllEmployeesByDepartment = () => {
     let query = `SELECT d.name AS department, e.first_name, e.last_name, r.title, r.salary 
                  FROM employee e 
@@ -206,7 +207,6 @@ const addEmployee = () => {
         },
     ];
 
-    // If the database already has employees, use global employee array for their choice
     if (employeeArr) {
         inquirer.prompt(questions).then((answers) => {
             const { firstName, lastName, role, manager } = answers;
@@ -470,7 +470,7 @@ const validateSalary = (salary) => {
 
 // SEED DATABASE
 // =========================================================================================
-const seedDatabase = () => {
+const populateArrays = () => {
     employeeArr.length = 0;
     roleArr.length = 0;
     salaryArr.length = 0;
@@ -490,7 +490,6 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             employeeArr.push(res[i].first_name + ' ' + res[i].last_name);
         }
-        // console.table(employeeArr);
     });
 
     connection.query(populateManagerArray, (err, res) => {
@@ -499,7 +498,6 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             managerArr.push(res[i].first_name + ' ' + res[i].last_name);
         }
-        // console.table(managerArr);
     });
 
     connection.query(populateRoleArray, (err, res) => {
@@ -508,7 +506,6 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             roleArr.push(res[i].title);
         }
-        // console.table(roleArr);
     });
 
     connection.query(populateSalaryArray, (err, res) => {
@@ -517,7 +514,6 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             salaryArr.push(res[i].salary);
         }
-        // console.table(salaryArr);
     });
 
     connection.query(populateDepartmentArray, (err, res) => {
@@ -526,6 +522,5 @@ const seedDatabase = () => {
         for (var i = 0; i < res.length; i++) {
             departmentArr.push(res[i].name);
         }
-        // console.table(departmentArr);
     });
 };
