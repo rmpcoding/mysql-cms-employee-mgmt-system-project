@@ -46,8 +46,9 @@ const prompt = () => {
                 'Terminate',
             ],
         })
-        .then((data) => {
-            switch (data.action) {
+        .then((answers) => {
+            const { action } = answers;
+            switch (action) {
                 case 'View all Employees':
                     viewAllEmployees(); //DONE
                     break;
@@ -240,6 +241,9 @@ const addEmployee = () => {
             });
         });
     }
+    return console.log(
+        'You will need to add roles and managers first to access this option'
+    );
 };
 
 // ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
@@ -260,13 +264,15 @@ const addRole = () => {
     ];
 
     inquirer.prompt(questions).then((answers) => {
+        const { role, salary } = answers;
+
         connection.query(
             `INSERT INTO role 
-             VALUES (DEFAULT, '${answers.role}', '${answers.salary}' , DEFAULT)`,
+             VALUES (DEFAULT, '${role}', '${salary}' , DEFAULT)`,
             (err, results, field) => {
                 if (err) throw err;
-                roleArr.push(answers.role);
-                salaryArr.push(answers.salary);
+                roleArr.push(role);
+                salaryArr.push(salary);
                 console.table(results);
                 console.log(roleArr);
                 console.log(parseInt(salaryArr));
@@ -287,12 +293,14 @@ const addDepartment = () => {
     ];
 
     inquirer.prompt(questions).then((answers) => {
+        const { department } = answers;
+
         connection.query(
             `INSERT INTO department 
-             VALUES (DEFAULT, '${answers.department}')`,
+             VALUES (DEFAULT, '${department}')`,
             (err, results, field) => {
                 if (err) throw err;
-                departmentArr.push(answers.department);
+                departmentArr.push(department);
                 console.table(results);
                 console.log(departmentArr);
             }
@@ -394,7 +402,8 @@ const updateEmployeeManager = () => {
             console.log('Employee successfully updated!');
         });
 
-        const viewUpdate = `SELECT e.id, e.first_name, e.last_name, r.title, r.id AS role_id, e.manager_id
+        const viewUpdate = `SELECT e.id, e.first_name, e.last_name, r.title, r.id AS role_id, 
+                                   e.manager_id
                             FROM employee e
                             JOIN role r
                             ON e.role_id = r.id;`;
