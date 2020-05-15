@@ -77,10 +77,11 @@ const prompt = () => {
                     break;
 
                 case 'Update Employee Role':
-                    updateEmployeeRole();
+                    updateEmployeeRole(); //DONE
                     break;
 
                 case 'Update Employee Manager':
+                    updateEmployeeManager();
                     break;
 
                 case 'View all Roles':
@@ -161,10 +162,10 @@ const viewAllEmployeesByManager = () => {
         let query = `SELECT id, first_name, last_name, role_id, manager_id
                      FROM employee
                      WHERE manager_id = (
-                     SELECT role_id
-                     FROM employee
-                     WHERE first_name = '${managerFirstName}' AND
-                           last_name = '${managerLastName}'
+                        SELECT role_id
+                        FROM employee
+                        WHERE first_name = '${managerFirstName}' AND
+                            last_name = '${managerLastName}'
                      );`;
 
         connection.query(query, (err, results, field) => {
@@ -300,7 +301,7 @@ const addDepartment = () => {
 };
 
 // UPDATE EMPLOYEE ROLE
-// ============================UNDER-CONSTRUCTION==========================================
+// =========================================================================================
 const updateEmployeeRole = () => {
     let questions = [
         {
@@ -347,9 +348,65 @@ const updateEmployeeRole = () => {
             console.table(results);
         });
     });
-}
+};
 
-// REMOVE EMPLOYEES 
+// UPDATE EMPLOYEE MANAGER
+// =========================================================================================
+const updateEmployeeManager = () => {
+    let questions = [
+        {
+            name: 'employeeName',
+            type: 'list',
+            message: `Which employee do you want to update with respect to their manager?`,
+            choices: employeeArr,
+        },
+        {
+            name: 'managerName',
+            type: 'list',
+            message: `Which manager best fits the employee?`,
+            choices: managerArr,
+        },
+    ];
+
+    inquirer.prompt(questions).then((answers) => {
+        const { employeeName, managerName } = answers;
+
+        let employeeFirstName = employeeName.split(' ').slice(0, 1).join();
+        let employeeLastName = employeeName.split(' ').slice(1).join();
+
+        let managerFirstName = managerName.split(' ').slice(0, 1).join();
+        let managerLastName = managerName.split(' ').slice(1).join();
+
+        let query = `UPDATE employee 
+                     SET manager_id = (
+                     SELECT role_id
+                     FROM (SELECT role_id 
+                         FROM employee
+                         WHERE first_name = '${managerFirstName}' AND
+                         last_name = '${managerLastName}'
+                         ) AS e
+                     )
+                    WHERE first_name = '${employeeFirstName}' AND last_name = '${employeeLastName}';`;
+
+        connection.query(query, (err, results, field) => {
+            if (err) throw err;
+            console.table(results);
+            console.log('Employee successfully updated!');
+        });
+
+        const viewUpdate = `SELECT e.id, e.first_name, e.last_name, r.title, r.id AS role_id, e.manager_id
+                            FROM employee e
+                            JOIN role r
+                            ON e.role_id = r.id;`;
+
+        connection.query(viewUpdate, (err, results, field) => {
+            if (err) throw err;
+            console.table(results);
+        });
+    });
+};
+
+// REMOVE EMPLOYEES
 // =========================================================================================
 const removeEmployee = () => {
     if (employeeArr) {
