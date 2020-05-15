@@ -53,10 +53,11 @@ const prompt = () => {
                     break;
 
                 case 'View all Employees by Department':
-                    viewAllEmployeesByDepartment(); //DONE
+                    viewAllEmployeesByDepartment(); //DONE but still needs work.
                     break;
 
                 case 'View all Employees by Manager':
+                    viewAllEmployeesByManager(); //DONE
                     break;
 
                 case 'Add Employee':
@@ -72,10 +73,11 @@ const prompt = () => {
                     break;
 
                 case 'Remove Employee':
-                    removeEmployee();
+                    removeEmployee(); //DONE
                     break;
 
                 case 'Update Employee Role':
+                    updateEmployeeRole();
                     break;
 
                 case 'Update Employee Manager':
@@ -97,7 +99,8 @@ const prompt = () => {
         });
 };
 
-// COMPLETE
+// VIEW ALL EMPLOYEES
+// =========================================================================================
 const viewAllEmployees = () => {
     let query = `SELECT e.first_name, e.last_name, r.title, d.name AS department
                  FROM employee e
@@ -112,6 +115,8 @@ const viewAllEmployees = () => {
     });
 };
 
+// VIEW ALL ROLES
+// =========================================================================================
 const viewAllRoles = () => {
     let query = `SELECT title, salary 
                  FROM role`;
@@ -121,6 +126,8 @@ const viewAllRoles = () => {
     });
 };
 
+// VIEW ALL EMPLOYEES BY DEPARTMENT
+// =========================================================================================
 const viewAllEmployeesByDepartment = () => {
     let query = `SELECT d.name AS department, e.first_name, e.last_name, r.title, r.salary 
                  FROM employee e 
@@ -130,6 +137,41 @@ const viewAllEmployeesByDepartment = () => {
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
+    });
+};
+
+// VIEW ALL EMPLOYEES BY MANAGER
+// =========================================================================================
+const viewAllEmployeesByManager = () => {
+    let questions = [
+        {
+            name: 'manager',
+            type: 'list',
+            message: `Under which manager would you like to view employees?`,
+            choices: managerArr,
+        },
+    ];
+
+    inquirer.prompt(questions).then((answers) => {
+        const { manager } = answers;
+
+        let managerFirstName = manager.split(' ').slice(0, 1).join();
+        let managerLastName = manager.split(' ').slice(1).join();
+
+        let query = `SELECT id, first_name, last_name, role_id, manager_id
+                     FROM employee
+                     WHERE manager_id = (
+                     SELECT role_id
+                     FROM employee
+                     WHERE first_name = '${managerFirstName}' AND
+                           last_name = '${managerLastName}'
+                     );`;
+
+        connection.query(query, (err, results, field) => {
+            if (err) throw err;
+            console.log(`${manager} manages the following employees:`);
+            console.table(results);
+        });
     });
 };
 
@@ -200,7 +242,7 @@ const addEmployee = () => {
 };
 
 // ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
-// =========================================================================================
+// =========================UNDER-CONSTRUCTION========================================
 const addRole = () => {
     let questions = [
         {
@@ -234,7 +276,6 @@ const addRole = () => {
 
 // ADD DEPARTMENT
 // =========================================================================================
-
 const addDepartment = () => {
     let questions = [
         {
@@ -258,7 +299,57 @@ const addDepartment = () => {
     });
 };
 
-// REMOVE EMPLOYEES STILL NEEDS SQL
+// UPDATE EMPLOYEE ROLE
+// ============================UNDER-CONSTRUCTION==========================================
+const updateEmployeeRole = () => {
+    let questions = [
+        {
+            name: 'employeeName',
+            type: 'list',
+            message: `Which employee do you want to update with respect to their role?`,
+            choices: employeeArr,
+        },
+        {
+            name: 'roleName',
+            type: 'list',
+            message: `Which role best fits the employee?`,
+            choices: roleArr,
+        },
+    ];
+
+    inquirer.prompt(questions).then((answers) => {
+        const { employeeName, roleName } = answers;
+
+        let firstName = employeeName.split(' ').slice(0, 1).join();
+        let lastName = employeeName.split(' ').slice(1).join();
+
+        let query = `UPDATE employee
+                     SET role_id = (
+                        SELECT id
+                        FROM role
+                        WHERE title = '${roleName}'
+                        )
+                     WHERE first_name = '${firstName}' AND last_name = '${lastName}';`;
+
+        connection.query(query, (err, results, field) => {
+            if (err) throw err;
+            console.table(results);
+            console.log('Employee successfully updated!');
+        });
+
+        const viewUpdate = `SELECT e.id, e.first_name, e.last_name, r.title, r.id AS role_id
+                            FROM employee e
+                            JOIN role r
+                            ON e.role_id = r.id;`;
+
+        connection.query(viewUpdate, (err, results, field) => {
+            if (err) throw err;
+            console.table(results);
+        });
+    });
+}
+
+// REMOVE EMPLOYEES 
 // =========================================================================================
 const removeEmployee = () => {
     if (employeeArr) {
@@ -282,15 +373,15 @@ const removeEmployee = () => {
             connection.query(query, (err, results, field) => {
                 if (err) throw err;
                 console.table(results);
-                console.log("Employee successfully removed!")
+                console.log('Employee successfully removed!');
             });
 
             const viewUpdate = `SELECT e.first_name, e.last_name, r.title, d.name AS department
-                              FROM employee e
-                              JOIN role r
-                              ON e.role_id = r.id
-                              JOIN department d
-                              ON r.department_id = d.id;`;
+                                FROM employee e
+                                JOIN role r
+                                ON e.role_id = r.id
+                                JOIN department d
+                                ON r.department_id = d.id;`;
 
             connection.query(viewUpdate, (err, results, field) => {
                 if (err) throw err;
@@ -329,55 +420,55 @@ const seedDatabase = () => {
     departmentArr.length = 0;
     managerArr.length = 0;
 
-    let seedEmployees = 'SELECT first_name, last_name FROM employee';
-    let seedManagers =
+    let populateEmployeeArray = 'SELECT first_name, last_name FROM employee';
+    let populateManagerArray =
         'SELECT first_name, last_name FROM employee WHERE manager_id IS NULL';
-    let seedRoles = 'SELECT title FROM role';
-    let seedSalaries = 'SELECT salary FROM role';
-    let seedDepartments = 'SELECT name FROM department';
+    let populateRoleArray = 'SELECT title FROM role';
+    let populateSalaryArray = 'SELECT salary FROM role';
+    let populateDepartmentArray = 'SELECT name FROM department';
 
-    connection.query(seedEmployees, (err, res) => {
+    connection.query(populateEmployeeArray, (err, res) => {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
             employeeArr.push(res[i].first_name + ' ' + res[i].last_name);
         }
-        console.table(employeeArr);
+        // console.table(employeeArr);
     });
 
-    connection.query(seedManagers, (err, res) => {
+    connection.query(populateManagerArray, (err, res) => {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
             managerArr.push(res[i].first_name + ' ' + res[i].last_name);
         }
-        console.table(managerArr);
+        // console.table(managerArr);
     });
 
-    connection.query(seedRoles, (err, res) => {
+    connection.query(populateRoleArray, (err, res) => {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
             roleArr.push(res[i].title);
         }
-        console.table(roleArr);
+        // console.table(roleArr);
     });
 
-    connection.query(seedSalaries, (err, res) => {
+    connection.query(populateSalaryArray, (err, res) => {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
             salaryArr.push(res[i].salary);
         }
-        console.table(salaryArr);
+        // console.table(salaryArr);
     });
 
-    connection.query(seedDepartments, (err, res) => {
+    connection.query(populateDepartmentArray, (err, res) => {
         if (err) throw err;
 
         for (var i = 0; i < res.length; i++) {
             departmentArr.push(res[i].name);
         }
-        console.table(departmentArr);
+        // console.table(departmentArr);
     });
 };
