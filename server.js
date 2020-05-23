@@ -114,7 +114,9 @@ const viewAllEmployees = () => {
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
+        console.log('Press up or down arrow to view options');
     });
+    prompt();
 };
 
 // VIEW ALL ROLES
@@ -125,7 +127,9 @@ const viewAllRoles = () => {
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
+        console.log('Press up or down arrow to view options');
     });
+    prompt();
 };
 
 // VIEW ALL EMPLOYEES BY DEPARTMENT
@@ -140,7 +144,9 @@ const viewAllEmployeesByDepartment = () => {
     connection.query(query, (err, results, field) => {
         if (err) throw err;
         console.table(results);
+        console.log('Press up or down arrow to view options');
     });
+    prompt();
 };
 
 // VIEW ALL EMPLOYEES BY MANAGER
@@ -174,6 +180,8 @@ const viewAllEmployeesByManager = () => {
             if (err) throw err;
             console.log(`${manager} manages the following employees:`);
             console.table(results);
+            
+            prompt();
         });
     });
 };
@@ -240,10 +248,12 @@ const addEmployee = () => {
                 console.table(employeeArr);
             });
         });
+        prompt();
     }
-    return console.log(
+    console.log(
         'You will need to add roles and managers first to access this option'
     );
+    prompt();
 };
 
 // ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
@@ -477,7 +487,7 @@ const validateSalary = (salary) => {
     return 'Please do not enter any commas.';
 };
 
-// SEED DATABASE
+// POPULATE ARRAYS
 // =========================================================================================
 const populateArrays = () => {
     employeeArr.length = 0;
