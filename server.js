@@ -132,6 +132,19 @@ const viewAllRoles = () => {
     prompt();
 };
 
+// VIEW ALL Departments
+// =========================================================================================
+const viewAllDepartments = () => {
+    let query = `SELECT id, name 
+                 FROM department`;
+    connection.query(query, (err, results, field) => {
+        if (err) throw err;
+        console.table(results);
+        console.log('Press up or down arrow to view options');
+    });
+    prompt();
+};
+
 // VIEW ALL EMPLOYEES BY DEPARTMENT
 // =========================================================================================
 // This needs work because it doesn't give the user a chance to choose the department they want by which to view employees
@@ -180,7 +193,7 @@ const viewAllEmployeesByManager = () => {
             if (err) throw err;
             console.log(`${manager} manages the following employees:`);
             console.table(results);
-            
+
             prompt();
         });
     });
@@ -216,14 +229,13 @@ const addEmployee = () => {
         },
     ];
 
-    if (employeeArr) {
-        inquirer.prompt(questions).then((answers) => {
-            const { firstName, lastName, role, manager } = answers;
+    inquirer.prompt(questions).then((answers) => {
+        const { firstName, lastName, role, manager } = answers;
 
-            let managerFirstName = manager.split(' ').slice(0, 1).join();
-            let managerLastName = manager.split(' ').slice(1).join();
+        let managerFirstName = manager.split(' ').slice(0, 1).join();
+        let managerLastName = manager.split(' ').slice(1).join();
 
-            let query = `INSERT INTO employee 
+        let query = `INSERT INTO employee 
                             (id, 
                             first_name, 
                             last_name, 
@@ -242,18 +254,13 @@ const addEmployee = () => {
                                     (e.last_name = '${managerLastName}') AND 
                                     (e.manager_id IS NULL)) );`;
 
-            connection.query(query, (err, results, field) => {
-                if (err) throw err;
-                employeeArr.push(`${firstName} ${lastName}`);
-                console.table(employeeArr);
-            });
+        connection.query(query, (err, results, field) => {
+            if (err) throw err;
+            employeeArr.push(`${firstName} ${lastName}`);
+            console.table(employeeArr);
+            prompt();
         });
-        prompt();
-    }
-    console.log(
-        'You will need to add roles and managers first to access this option'
-    );
-    prompt();
+    });
 };
 
 // ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
@@ -263,12 +270,12 @@ const addRole = () => {
         {
             name: 'role',
             type: 'input',
-            message: `What's the employee's job title?`,
+            message: `What role would you like to add to the database?`,
         },
         {
             name: 'salary',
             type: 'input',
-            message: `What's the employee's salary?`,
+            message: `What's the role's associated salary?`,
             validate: validateSalary,
         },
     ];
@@ -364,6 +371,7 @@ const updateEmployeeRole = () => {
         connection.query(viewUpdate, (err, results, field) => {
             if (err) throw err;
             console.table(results);
+            prompt();
         });
     });
 };

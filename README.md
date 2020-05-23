@@ -2,11 +2,15 @@
 
 ## An employee management system command line application. 
 
-### User is prompted with a series of questions regarding the adding, removing, or updating of employees, which then modifies the MySQL database accordingly.
+### User is prompted with a series of content management system questions regarding employees, roles, departments, and managers. Answers then modify MySQL database accordingly. Included is a seeds.sql file for streamlined data population.
+
+
+
+
 
 ## Technologies used
-* JavaScript
-* Node.js
-* Express
 * MySQL
+* JavaScript (ES6)
+* Node.js
+* Inquirer
 * Console.table
