@@ -54,7 +54,7 @@ const prompt = () => {
                     break;
 
                 case 'View all Employees by Department':
-                    viewAllEmployeesByDepartment(); //DONE but still needs work.
+                    viewAllEmployeesByDepartment(); //DONE but still could use work for giving user options.
                     break;
 
                 case 'View all Employees by Manager':
@@ -147,7 +147,7 @@ const viewAllDepartments = () => {
 
 // VIEW ALL EMPLOYEES BY DEPARTMENT
 // =========================================================================================
-// This needs work because it doesn't give the user a chance to choose the department they want by which to view employees
+// This needs work because it doesn't give the user a chance to choose under which department they want to view employees
 const viewAllEmployeesByDepartment = () => {
     let query = `SELECT d.name AS department, e.first_name, e.last_name, r.title, r.salary 
                  FROM employee e 
@@ -193,7 +193,6 @@ const viewAllEmployeesByManager = () => {
             if (err) throw err;
             console.log(`${manager} manages the following employees:`);
             console.table(results);
-
             prompt();
         });
     });
@@ -263,8 +262,9 @@ const addEmployee = () => {
     });
 };
 
-// ADD ROLE NEED TO ADD DEPARTMENT INPUT THEN PUSH TO DEPARTMENT ARRAY
-// =========================UNDER-CONSTRUCTION========================================
+// ADD ROLE
+// =========================================================================================
+let departmentId;
 const addRole = () => {
     let questions = [
         {
@@ -278,23 +278,37 @@ const addRole = () => {
             message: `What's the role's associated salary?`,
             validate: validateSalary,
         },
+        {
+            name: 'department',
+            type: 'list',
+            message: `Which department is associated with this new role?`,
+            choices: departmentArr,
+        },
     ];
 
     inquirer.prompt(questions).then((answers) => {
-        const { role, salary } = answers;
+        const { role, salary, department } = answers;
+        let departmentIdQuery = `SELECT id 
+                                 FROM department d
+                                 WHERE name = '${department}'`;
 
-        connection.query(
-            `INSERT INTO role 
-             VALUES (DEFAULT, '${role}', '${salary}' , DEFAULT)`,
-            (err, results, field) => {
+        connection.query(departmentIdQuery, (err, results, field) => {
+            if (err) throw err;
+            departmentId = results[0].id;
+            addRoleWithDepartmentId();
+        });
+
+        const addRoleWithDepartmentId = () => {
+            let query = `INSERT INTO role
+                         VALUES (DEFAULT, '${role}', '${salary}', '${departmentId}')`;
+            connection.query(query, (err, results, field) => {
                 if (err) throw err;
                 roleArr.push(role);
                 salaryArr.push(salary);
-                console.table(results);
-                console.log(roleArr);
-                console.log(parseInt(salaryArr));
-            }
-        );
+                console.log("Role successfully added!")
+                viewAllRoles()
+            });
+        }
     });
 };
 
@@ -318,8 +332,8 @@ const addDepartment = () => {
             (err, results, field) => {
                 if (err) throw err;
                 departmentArr.push(department);
-                console.table(results);
-                console.log(departmentArr);
+                console.log("Department successfully added!")
+                viewAllDepartments()
             }
         );
     });
@@ -429,6 +443,7 @@ const updateEmployeeManager = () => {
         connection.query(viewUpdate, (err, results, field) => {
             if (err) throw err;
             console.table(results);
+            prompt();
         });
     });
 };
@@ -470,6 +485,7 @@ const removeEmployee = () => {
             connection.query(viewUpdate, (err, results, field) => {
                 if (err) throw err;
                 console.table(results);
+                prompt();
             });
         });
     }
