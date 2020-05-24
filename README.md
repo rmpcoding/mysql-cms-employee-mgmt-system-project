@@ -5,7 +5,7 @@
 ### User is prompted with a series of content management system questions regarding employees, roles, departments, and managers. Answers then modify MySQL database accordingly. Included is a seeds.sql file for streamlined data population.
 
 
-
+![](MySQL.gif)
 
 
 ## Technologies used
